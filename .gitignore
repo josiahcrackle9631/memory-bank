@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.npm/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build
+dist/
+build/
+*.skill
+
+# Logs
+*.log
+npm-debug.log*
+
+# Memory Bank — choose your strategy:
+#
+# Solo project (personal memory, not shared):
+#   Uncomment these lines:
+# MEMORY.md
+# MEMORY-*.md
+# MEMORY-ARCHIVE.md
+# .memory/
+#
+# Team project (shared memory, personal overlays):
+#   Uncomment only the personal files:
+# .memory/branches/
+# MEMORY-ARCHIVE.md
+#
+# By default, nothing is ignored — you decide what to commit.
+.omc/
