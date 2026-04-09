@@ -102,7 +102,7 @@ WITH memory-bank (every session):
 ## Install
 
 ```bash
-npx skills add Nagendhra-web/memory-bank/skills/memory-bank
+npx skills add Nagendhra-web/memory-bank
 ```
 
 Then add the auto-setup to your `CLAUDE.md` (or `~/.claude/CLAUDE.md` for all projects):
@@ -292,7 +292,7 @@ No more losing work when sessions end. No more re-explaining when they start.
 **1. Install the skill**
 
 ```bash
-npx skills add Nagendhra-web/memory-bank/skills/memory-bank
+npx skills add Nagendhra-web/memory-bank
 ```
 
 **2. Start a session with Claude Code**
