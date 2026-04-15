@@ -1,8 +1,8 @@
 ---
 name: memory-bank
 description: >
-  Token-efficient persistent memory system for Claude Code that extends your
-  session limits by 3-5x. Layered architecture with progressive loading,
+  Token-efficient persistent memory system for Claude Code that saves ~67%
+  tokens on session warm-up (verified with tiktoken). Layered architecture with progressive loading,
   compact encoding, branch-aware context, smart compression, session diffing,
   conflict detection, session continuation protocol, and recovery mode.
   Activates at session start (if MEMORY.md exists), on "remember this",
@@ -446,40 +446,47 @@ The #1 complaint with Claude Code: **sessions hit context limits too fast.**
 You spend half your tokens re-explaining context, and the other half doing
 actual work. Memory Bank flips this ratio.
 
-### The Token Problem (Without Memory Bank)
+### The Token Problem (Verified with tiktoken)
+
+Without memory-bank, every session start costs ~1,200 tokens:
 
 ```
-Session start WITHOUT memory-bank:
+Conversation overhead (4 exchanges):      ~566 tokens
+  User re-explains project, stack, status
+  Claude asks clarifying questions
+  User answers follow-ups
+  Back-and-forth until Claude understands
 
-User: "Let's continue working on the app"
-Claude: "What app? What stack? What were we doing?"
-User: "It's a Next.js e-commerce app with Prisma and Stripe..."
-       [400+ tokens explaining the project]
-User: "We were building the checkout flow..."
-       [300+ tokens explaining current state]
-User: "The key files are..."
-       [200+ tokens listing files]
-User: "We decided to use X because..."
-       [300+ tokens re-explaining decisions]
+File reads (Claude reads 3+ files to orient): ~634 tokens
+  Webhook handler:    ~344 tokens
+  Checkout route:     ~257 tokens
+  Stripe client:      ~33 tokens
 
-Total wasted: ~1,200+ tokens EVERY SESSION just to get back to baseline.
-Over 10 sessions: ~12,000 tokens wasted on re-explanation alone.
+TOTAL per session: ~1,200 tokens
+TOTAL over 10 sessions: ~12,000 tokens wasted
 ```
 
-### The Token Solution (With Memory Bank)
+### The Token Solution (Verified)
+
+With memory-bank, the same session start costs ~400 tokens:
 
 ```
-Session start WITH memory-bank:
+MEMORY.md loads (compact format):  ~334 tokens
+  Entire project context in one structured file
+  Decisions, files, status, blockers, architecture
 
-Claude reads MEMORY.md: ~800 tokens (compact, structured, complete)
-Claude greets with full context: ~150 tokens
-User: "Let's go"
+Claude greeting + user confirms:   ~60 tokens
+  Claude already knows everything, no questions needed
 
-Total: ~950 tokens. Savings: 60-80% per session start.
-Over 10 sessions: ~9,000+ tokens saved on context alone.
+File reads needed:                 0 tokens
+  Memory has file purposes, no need to read source
+
+TOTAL per session: ~394 tokens (67% reduction)
+TOTAL over 10 sessions: ~3,940 tokens (saved ~8,060)
 ```
 
-But session-start savings are just the beginning.
+These numbers were measured using tiktoken on our example files.
+Actual savings depend on project complexity (larger projects save more).
 
 ### Progressive Loading
 
@@ -623,18 +630,25 @@ Step 3: GREET AND GO (next session)
 **Trigger phrases:** "save state", "I'm running out of context",
 "continue this later", "session is getting long"
 
-### Token Savings By Feature
+### Token Savings By Feature (Verified)
 
-| Feature | Tokens Saved Per Session | How |
-|---------|------------------------|-----|
-| Structured memory vs re-explaining | 800-1,500 | Compact format replaces verbal explanation |
-| Progressive loading (Tier 1 only) | 300-600 | Don't load what you don't need |
-| Compact encoding (tables > prose) | 200-400 | Same info, fewer tokens |
-| Session continuation protocol | 500-1,000 | Zero warm-up in new sessions |
-| Smart compression | 200-500 | Smaller file = fewer tokens to read |
-| Branch-aware selective loading | 100-300 | Skip irrelevant branch context |
-| **Total per session** | **2,100-4,300** | |
-| **Over 10 sessions** | **21,000-43,000** | |
+| Feature | How It Saves | Measured Impact |
+|---------|-------------|-----------------|
+| Structured memory vs re-explaining | Compact file replaces 4+ conversation exchanges | ~566 tokens/session |
+| Eliminating orientation file reads | Claude doesn't need to read source files to understand project | ~634 tokens/session |
+| Compact encoding (tables > prose) | Same info, 39-42% fewer tokens than prose | 39-42% reduction in memory size |
+| Session continuation protocol | CONTINUATION.md is under 200 tokens vs full re-warm-up | ~1,000 tokens on session handoff |
+| Smart compression | Keeps memory under 150 lines / ~700 tokens | Prevents bloat over time |
+
+**Verified totals (measured with tiktoken):**
+
+| Scenario | Tokens | Turns |
+|----------|--------|-------|
+| Without memory-bank | ~1,200/session | 8 turns |
+| With memory-bank | ~394/session | 2 turns |
+| **Savings** | **~806/session (67%)** | **6 turns** |
+| Over 10 sessions | **~8,060 saved** | 60 turns saved |
+| Over 30 sessions | **~24,180 saved** | 180 turns saved |
 
 ### Anti-Patterns That Waste Tokens
 

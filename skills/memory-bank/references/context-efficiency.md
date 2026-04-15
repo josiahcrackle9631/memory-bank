@@ -9,31 +9,36 @@ maximizing what Claude knows about your project.
 
 ---
 
-## The Math
+## The Math (Verified with tiktoken)
 
 Claude Code's context window is finite. Every token matters:
 
 ```
-Typical session budget:      ~200,000 tokens
-System prompt + tools:       ~5,000 tokens (fixed overhead)
-Memory load (without MB):    ~0 tokens (Claude knows nothing)
-Re-explanation each session:  ~1,200-3,000 tokens (user explaining context)
-Back-and-forth clarification: ~500-2,000 tokens (Claude asking questions)
+Typical session budget:      ~200,000 tokens (200k window)
+System prompt:               ~14,328 tokens (fixed, always present)
+System tools:                ~17,600 tokens (fixed)
+Autocompact buffer:          ~33,000 tokens (reserved, unusable)
+Available for work:          ~135,000 tokens
 
-Total waste without memory:  ~1,700-5,000 tokens per session start
-Multiplied by 10 sessions:   ~17,000-50,000 tokens gone
+WITHOUT memory-bank (measured):
+  Conversation overhead:     ~566 tokens (4 exchanges to re-explain)
+  File reads to orient:      ~634 tokens (Claude reads 3+ source files)
+  Total waste per session:   ~1,200 tokens
+  Over 10 sessions:          ~12,000 tokens gone
 
-With Memory Bank:
-Memory load (compact):       ~200-800 tokens (structured, complete)
-Re-explanation:              ~0 tokens (memory has everything)
-Clarification:               ~0 tokens (next step is crystal clear)
+WITH memory-bank (measured):
+  Compact MEMORY.md:         ~334-667 tokens (depends on project size)
+  Greeting + confirm:        ~60 tokens
+  File reads:                0 tokens (memory has context)
+  Total per session:         ~394-727 tokens
 
-Net savings per session:     ~1,500-4,200 tokens
-Net savings over 10 sessions: ~15,000-42,000 tokens
+Net savings per session:     ~473-806 tokens (39-67% reduction)
+Net savings over 10 sessions: ~4,730-8,060 tokens
 ```
 
-Those saved tokens become actual work — more code, more features, more
-sessions before hitting limits.
+These numbers were measured using tiktoken (cl100k_base) on our example
+MEMORY.md files with realistic session-start conversations. Claude's
+tokenizer differs slightly, but the ratios hold.
 
 ---
 

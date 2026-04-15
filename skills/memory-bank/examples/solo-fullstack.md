@@ -1,85 +1,65 @@
 # Project Memory
 Last updated: 2025-04-08 | Session 7 | Branch: feature/checkout
-Memory health: 8/10
+Health: 8/10
 
 ## Project Overview
-E-commerce site for a local bakery ("Sweet Crumb"). Next.js 14 App Router,
-Prisma + PostgreSQL, Stripe payments, Tailwind CSS. Deployed on Vercel,
-DB on Neon. Target launch: end of April.
+Bakery e-commerce (Sweet Crumb). Next.js 14 App Router, Prisma, PostgreSQL, Stripe, Tailwind. Vercel + Neon. Launch: end April.
 
 ## Where We Left Off
-- **Current task:** Stripe webhook handler in `src/app/api/webhooks/stripe/route.ts`
-- **Status:** in progress — `handlePaymentSuccess()` is complete, `handleRefund()` is stubbed
-- **Next immediate step:** Implement `handleRefund()` using the Stripe refund event payload, then write integration tests for both webhook handlers
-- **Open question:** Use Stripe CLI for local webhook testing or mock the events?
-
-## Completed
-- [Sessions 1-3] Project scaffolding, Prisma schema (User, Product, Order, OrderItem), seed data
-- [2025-03-28] Product listing page with SSR + pagination (`src/app/products/page.tsx`)
-- [2025-03-30] Shopping cart with Zustand store + localStorage persistence
-- [2025-04-02] Cart page UI with quantity controls and price calculation
-- [2025-04-05] Stripe checkout session creation in `src/app/api/checkout/route.ts`
-- [2025-04-07] `handlePaymentSuccess()` webhook — creates Order, sends confirmation email via Resend
-
-## Active Work
-- [ ] `handleRefund()` in webhook handler (next up)
-- [ ] Integration tests for webhook endpoints
-- [ ] Order confirmation email template (Resend + React Email)
-- [ ] Admin dashboard — order list with status filters (not started)
-- [ ] Product image optimization with next/image (not started)
+- **Task:** Stripe webhook handler `src/app/api/webhooks/stripe/route.ts`
+- **Status:** WIP. `handlePaymentSuccess()` DONE, `handleRefund()` stubbed at line 89
+- **Next:** Implement `handleRefund()` using `refund.created` event, then integration tests
+- **Open:** Use Stripe CLI for local webhook testing or mock events?
 
 ## Blockers
-- Need Stripe webhook signing secret from client's Stripe dashboard before
-  testing payments end-to-end in staging. Dev testing works with Stripe CLI.
+- Need Stripe webhook signing secret from client for staging
 
 ## Key Decisions
-| Date | Decision | Reasoning | Affects |
-|------|----------|-----------|---------|
-| 2025-03-20 | App Router over Pages Router | Server components, better data fetching, future-proof | All pages |
-| 2025-03-20 | Prisma over Drizzle | Better TypeScript inference, built-in migrations, team familiarity | All DB access |
-| 2025-03-25 | Stripe over Paddle | Client already has Stripe account, better API docs | Payment flow |
-| 2025-03-25 | Zustand over Context for cart | Simpler API, localStorage middleware built-in | Cart state |
-| 2025-04-02 | Resend over SendGrid for email | Better DX, React Email support, simpler pricing | Transactional email |
+| Decision | Why | Affects |
+|----------|-----|---------|
+| App Router over Pages | Server components, future-proof | All pages |
+| Prisma over Drizzle | TS inference, migrations | All DB |
+| Stripe over Paddle | Client has Stripe account | Payments |
+| Zustand for cart | Simple API, localStorage built-in | Cart state |
+| Resend for email | React Email support, simple pricing | Transactional email |
 
 ## Key Files
-| File | Purpose | Last Modified |
-|------|---------|---------------|
-| `src/app/api/webhooks/stripe/route.ts` | Stripe webhook handler | Session 7 |
-| `src/app/api/checkout/route.ts` | Creates Stripe checkout sessions | Session 6 |
-| `src/lib/stripe.ts` | Stripe client singleton + helpers | Session 5 |
-| `src/stores/cart.ts` | Zustand cart store with persistence | Session 4 |
-| `src/app/products/page.tsx` | Product listing with pagination | Session 3 |
-| `prisma/schema.prisma` | Database schema | Session 3 |
-| `src/lib/email.ts` | Resend client + email helpers | Session 7 |
+| File | Purpose |
+|------|---------|
+| `src/app/api/webhooks/stripe/route.ts` | Webhook handler |
+| `src/app/api/checkout/route.ts` | Stripe session creation |
+| `src/lib/stripe.ts` | Stripe client singleton |
+| `src/stores/cart.ts` | Zustand cart + persistence |
+| `prisma/schema.prisma` | DB schema (User, Product, Order) |
+| `src/lib/email.ts` | Resend client + helpers |
 
-## Architecture Notes
-- All payment logic is server-side only. No Stripe keys in client code.
-- Cart is client-side (Zustand + localStorage). On checkout, cart items are
-  sent to `/api/checkout` which validates against DB prices (never trust client).
-- Webhook handler verifies Stripe signature before processing any event.
-- Orders are created only after successful payment confirmation via webhook,
-  not at checkout session creation.
+## Active Work
+- [ ] `handleRefund()` in webhook handler
+- [ ] Integration tests for webhook endpoints
+- [ ] Order confirmation email template
+- [ ] Admin dashboard (not started)
 
-## Known Issues
-- Product images are unoptimized PNGs from the client. Need to convert to
-  WebP and use next/image with proper sizing. Low priority until launch.
-- Cart doesn't sync across tabs (localStorage limitation). Acceptable for now.
+## Completed
+- [S1-3] Scaffolding, Prisma schema, seed data
+- [S4] Product listing SSR + pagination
+- [S5] Cart with Zustand + localStorage, checkout UI
+- [S6] Stripe checkout session creation
+- [S7] `handlePaymentSuccess()` webhook, Resend email setup
+
+## Architecture
+- All payment logic server-side only. No Stripe keys in client.
+- Cart is client-side. On checkout, items validated against DB prices.
+- Orders created only after webhook confirmation, not at session creation.
 
 ## Session Log
-| Session | Date | Summary |
-|---------|------|---------|
-| 5 | 2025-04-02 | Cart page UI, started Stripe integration |
-| 6 | 2025-04-05 | Stripe checkout session creation, tested with Stripe CLI |
-| 7 | 2025-04-08 | Webhook handler (payment success), email setup with Resend |
-
-## User Preferences
-- Prefers server components unless interactivity is specifically needed
-- Wants explicit error handling (no silent catches)
-- Likes small, focused commits with conventional commit messages
-- Prefers Zod for all runtime validation
+| S# | Date | Summary |
+|----|------|---------|
+| 5 | 04-02 | Cart UI, started Stripe |
+| 6 | 04-05 | Checkout session creation |
+| 7 | 04-08 | Payment webhook, email setup |
 
 ## External Context
-- Stripe account: client-managed (test mode keys in `.env.local`)
-- Neon PostgreSQL: connection string in `DATABASE_URL`
-- Resend: API key in `RESEND_API_KEY`, sending from `orders@sweetcrumb.com`
-- Vercel deployment: auto-deploys from `main` branch
+- Stripe: test keys in `.env.local`, client-managed account
+- Neon: `DATABASE_URL` in env
+- Resend: `RESEND_API_KEY`, sending from `orders@sweetcrumb.com`
+- Vercel: auto-deploys from `main`

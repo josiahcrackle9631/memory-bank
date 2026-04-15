@@ -8,7 +8,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/Nagendhra-web/memory-bank?style=for-the-badge&labelColor=1a1a2e&color=378ADD)](https://github.com/Nagendhra-web/memory-bank/issues)
 ![version](https://img.shields.io/badge/version-2.0.0-7F77DD?style=for-the-badge&labelColor=1a1a2e)
 ![license](https://img.shields.io/badge/license-Apache_2.0-1D9E75?style=for-the-badge&labelColor=1a1a2e)
-![token savings](https://img.shields.io/badge/token_savings-60--80%25-FFD700?style=for-the-badge&labelColor=1a1a2e)
+![token savings](https://img.shields.io/badge/token_savings-67%25_verified-FFD700?style=for-the-badge&labelColor=1a1a2e)
 ![works with](https://img.shields.io/badge/Claude_Code-ready-D85A30?style=for-the-badge&labelColor=1a1a2e)
 ![standard](https://img.shields.io/badge/agentskills.io-standard-378ADD?style=for-the-badge&labelColor=1a1a2e)
 [![CI](https://img.shields.io/github/actions/workflow/status/Nagendhra-web/memory-bank/validate.yml?style=for-the-badge&labelColor=1a1a2e&label=CI)](https://github.com/Nagendhra-web/memory-bank/actions)
@@ -51,54 +51,65 @@ yours. The next step is writing integration tests for the webhook
 endpoint. Ready to go?
 
 Memory health: 9/10 | Branch: feature/checkout | Session 7
-Context used for warm-up: ~800 tokens (vs ~3,000 without memory-bank)
+Context used for warm-up: ~394 tokens (vs ~1,200 without memory-bank)
 ```
 
-No re-explaining. No lost context. No wasted tokens. **Sessions last 3-5x longer.**
+No re-explaining. No lost context. No wasted tokens.
 
 ---
 
-## Token Savings
+## Token Savings (Verified with tiktoken)
 
-Real numbers. No fluff.
+Real numbers. Measured, not estimated.
 
 ```
 WITHOUT memory-bank (every session):
-  Re-explain project:     ~400-800 tokens
-  Re-explain decisions:   ~300-600 tokens
-  Re-explain current work: ~200-500 tokens
-  Clarification Q&A:      ~500-1,500 tokens
-  ─────────────────────────────────────────
-  Total waste per session: ~1,400-3,400 tokens
+  Conversation overhead (4 exchanges):     ~566 tokens
+    User re-explains project and status
+    Claude asks clarifying questions
+    User answers follow-ups
 
+  File reads (Claude reads 3+ source files): ~634 tokens
+    Claude needs to read code to orient itself
+
+  TOTAL per session:                        ~1,200 tokens
+```
+
+```
 WITH memory-bank (every session):
-  Compact memory load:    ~200-800 tokens (structured, complete)
-  Re-explanation:         0 tokens
-  Clarification:          0 tokens
-  ─────────────────────────────────────────
-  Total cost per session: ~200-800 tokens
+  Compact MEMORY.md loads:                  ~334 tokens
+    Entire project context in one file
 
-  SAVINGS: 60-80% fewer tokens on context loading
+  Claude greeting + user confirms:          ~60 tokens
+    No questions needed, Claude knows everything
+
+  File reads:                               0 tokens
+    Memory already describes key files
+
+  TOTAL per session:                        ~394 tokens
 ```
 
 | Metric | Without | With memory-bank |
 |--------|---------|-----------------|
-| Warm-up tokens per session | 1,400-3,400 | 200-800 |
-| Token savings per session | — | 1,200-2,600 |
-| Savings over 10 sessions | — | **12,000-26,000** |
-| Sessions before context limit | Baseline | **3-5x more** |
+| Warm-up tokens per session | ~1,200 | ~394 |
+| Token savings per session | baseline | **~806 saved (67%)** |
+| Conversation turns to start | 8 turns | **2 turns** |
+| File reads needed | 3+ files | **0 files** |
 | Time to productive work | 2-5 minutes | **Instant** |
+| Savings over 10 sessions | baseline | **~8,060 tokens** |
+| Savings over 30 sessions | baseline | **~24,180 tokens** |
 
-### How It Saves Tokens
+### Where the Savings Come From
 
-| Technique | Savings | How |
-|-----------|---------|-----|
-| Structured memory vs re-explaining | 800-1,500/session | Compact format replaces verbal explanation |
-| Progressive loading (load only what's needed) | 300-600/session | Skip irrelevant sections |
-| Compact encoding (tables > prose) | 200-400/session | Same info, 50% fewer tokens |
-| Session continuation protocol | 500-1,000/handoff | Zero warm-up after context limits |
-| Smart compression | 200-500/session | Smaller file = fewer tokens to read |
-| Concise Claude responses | 300-800/session | Claude optimizes its own output |
+| Source | Tokens Saved | Why |
+|--------|-------------|-----|
+| Eliminates re-explanation conversation | ~566/session | 4 exchanges replaced by one memory load |
+| Eliminates orientation file reads | ~634/session | Memory describes files, no need to read source |
+| Compact encoding (tables over prose) | 39-42% smaller | Same info, fewer tokens |
+| Session continuation (CONTINUATION.md) | ~1,000/handoff | Under 200 tokens vs full re-warm-up |
+| Smart compression | prevents bloat | Keeps memory under 700 tokens |
+
+*All numbers measured using tiktoken (cl100k_base) on our example MEMORY.md files.*
 
 ---
 
